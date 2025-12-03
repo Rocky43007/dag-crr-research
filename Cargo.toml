@@ -1,0 +1,55 @@
+[package]
+name = "dag-crr"
+version = "0.1.0"
+edition = "2021"
+authors = ["Arnab Chakraborty <arnchakrabor@cs.stonybrook.edu>"]
+description = "DAG+CRR: Per-Column Versioning with DAG History for Local-First Databases"
+license = "MIT"
+repository = "https://github.com/rocky43007/dag-crr-research"
+keywords = ["crdt", "synchronization", "distributed-systems", "database", "local-first"]
+categories = ["database", "data-structures", "concurrency"]
+readme = "README.md"
+
+[dependencies]
+sync-engine = { path = "sync-engine", features = ["sqlite"] }
+gpui = { git = "https://github.com/zed-industries/zed.git", package = "gpui", rev = "fd4682c8d1a3af412002e2e66a5e3137635c5e86", features = ["runtime_shaders"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+
+[workspace]
+members = ["sync-engine"]
+
+[[bin]]
+name = "dag-crr-demo"
+path = "src/main.rs"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+rusqlite = { version = "0.32", features = ["bundled", "load_extension"] }
+tempfile = "3.14"
+automerge = "0.5"
+
+[[bench]]
+name = "paper_benchmarks"
+harness = false
+
+[[bench]]
+name = "fair_comparison"
+harness = false
+
+[[bench]]
+name = "gc_demo"
+harness = false
+
+[[bench]]
+name = "alternatives"
+harness = false
+
+[[bench]]
+name = "paper_extended"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true

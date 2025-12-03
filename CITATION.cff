@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "DAG-CRR: Per-Column Conflict Resolution with Coordination-Free Garbage Collection"
+authors:
+  - family-names: Chakraborty
+    given-names: Arnab
+    email: arnchakrabor@cs.stonybrook.edu
+    affiliation: "Stony Brook University"
+    orcid: "https://orcid.org/0009-0008-6321-1733"
+repository-code: "https://github.com/rocky43007/dag-crr-research"
+license: MIT
+keywords:
+  - CRDT
+  - synchronization
+  - distributed-systems
+  - local-first
+  - database
+  - conflict-resolution
+  - garbage-collection
+abstract: >-
+  DAG-CRR is a per-column synchronization mechanism with DAG-based history
+  for local-first databases. The key insight is that history can be decoupled
+  from merge correctness: if merge uses only version numbers (not history),
+  then each peer can garbage collect its history independently without
+  affecting convergence.

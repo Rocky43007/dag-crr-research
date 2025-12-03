@@ -1,0 +1,29 @@
+# Rust
+/target/
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.so
+*.dylib
+*.dll
+
+# Paper (VLDB/SIGMOD submission)
+paper/
+
+# Environment and credentials
+.env
+.env.*
+.venv/
+
+# Transient benchmark files (Criterion HTML reports built on demand)
+*.bench.json
