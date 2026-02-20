@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 use rusqlite::Connection;
-use sync_engine::{CrrTable, Changeset};
+use sync_engine::{CrrTable, SqliteStorage, MemoryStorage, Changeset};
 
 pub fn generate_file_record(idx: usize) -> HashMap<String, String> {
     let dirs = ["Documents", "Pictures", "Videos", "Downloads", "Projects"];
@@ -41,6 +41,56 @@ pub fn create_table(rows: usize) -> CrrTable {
 }
 
 pub fn create_changeset(count: usize, version: u64) -> Changeset {
+    let mut changes = HashMap::new();
+    for i in 0..count {
+        let pk = format!("file_{}", i);
+        let mut record = generate_file_record(i);
+        record.insert("modified_at".into(), (1704067200 + i as u64 + 86400).to_string());
+        record.insert("tags".into(), "updated,synced".into());
+
+        let columns: HashMap<String, Vec<u8>> = record
+            .into_iter()
+            .map(|(k, v)| (k, v.into_bytes()))
+            .collect();
+        let versions: HashMap<String, u64> = columns.keys()
+            .map(|k| (k.clone(), version))
+            .collect();
+        changes.insert(pk, (columns, versions));
+    }
+    Changeset { changes }
+}
+
+pub fn create_table_sqlite(rows: usize) -> CrrTable<SqliteStorage> {
+    let storage = SqliteStorage::open_in_memory().unwrap();
+    let mut table = CrrTable::with_storage(storage);
+    for i in 0..rows {
+        let record = generate_file_record(i);
+        let pk = format!("file_{}", i);
+        let mut builder = table.insert(&pk);
+        for (col, value) in &record {
+            builder = builder.column_str(col, value, 1);
+        }
+        builder.commit().unwrap();
+    }
+    table
+}
+
+pub fn create_table_memory(rows: usize) -> CrrTable<MemoryStorage> {
+    let storage = MemoryStorage::new();
+    let mut table = CrrTable::with_storage(storage);
+    for i in 0..rows {
+        let record = generate_file_record(i);
+        let pk = format!("file_{}", i);
+        let mut builder = table.insert(&pk);
+        for (col, value) in &record {
+            builder = builder.column_str(col, value, 1);
+        }
+        builder.commit().unwrap();
+    }
+    table
+}
+
+pub fn create_changeset_for_sqlite(count: usize, version: u64) -> Changeset {
     let mut changes = HashMap::new();
     for i in 0..count {
         let pk = format!("file_{}", i);

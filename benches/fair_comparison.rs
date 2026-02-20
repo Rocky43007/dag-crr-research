@@ -22,6 +22,10 @@ fn bench_insert(c: &mut Criterion) {
             b.iter(|| black_box(common::create_table(rows)))
         });
 
+        group.bench_with_input(BenchmarkId::new("DAG-CRR_SQLite", rows), &rows, |b, &rows| {
+            b.iter(|| black_box(common::create_table_sqlite(rows)))
+        });
+
         if has_crsqlite {
             group.bench_with_input(BenchmarkId::new("CR-SQLite", rows), &rows, |b, &rows| {
                 b.iter_batched(
@@ -63,6 +67,20 @@ fn bench_merge(c: &mut Criterion) {
                 || {
                     let table = common::create_table(10_000);
                     let changeset = common::create_changeset(size, 2);
+                    (table, changeset)
+                },
+                |(mut table, changeset)| {
+                    black_box(table.merge(&changeset, TieBreakPolicy::LexicographicMin))
+                },
+                criterion::BatchSize::SmallInput,
+            )
+        });
+
+        group.bench_with_input(BenchmarkId::new("DAG-CRR_SQLite", size), &size, |b, &size| {
+            b.iter_batched(
+                || {
+                    let table = common::create_table_sqlite(10_000);
+                    let changeset = common::create_changeset_for_sqlite(size, 2);
                     (table, changeset)
                 },
                 |(mut table, changeset)| {
@@ -115,6 +133,15 @@ fn bench_read(c: &mut Criterion) {
     for rows in [1_000, 10_000] {
         group.bench_with_input(BenchmarkId::new("DAG-CRR", rows), &rows, |b, &rows| {
             let table = common::create_table(rows);
+            b.iter(|| {
+                for i in 0..100 {
+                    let _ = black_box(table.get(&format!("file_{}", i % rows)));
+                }
+            })
+        });
+
+        group.bench_with_input(BenchmarkId::new("DAG-CRR_SQLite", rows), &rows, |b, &rows| {
+            let table = common::create_table_sqlite(rows);
             b.iter(|| {
                 for i in 0..100 {
                     let _ = black_box(table.get(&format!("file_{}", i % rows)));

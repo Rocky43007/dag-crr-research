@@ -484,6 +484,29 @@ fn bench_memory_usage(c: &mut Criterion) {
     group.finish();
 }
 
+// --- Optimized Memory Backend (MemoryStorage with interning + dedup) ---
+
+fn bench_memory_usage_optimized(c: &mut Criterion) {
+    let mut group = c.benchmark_group("MemoryUsageOptimized");
+    group.sample_size(10);
+
+    for rows in [1_000, 10_000, 100_000, 1_000_000] {
+        group.bench_with_input(BenchmarkId::from_parameter(rows), &rows, |b, &rows| {
+            b.iter_custom(|iters| {
+                let mut total = Duration::ZERO;
+                for _ in 0..iters {
+                    let start = Instant::now();
+                    let table = common::create_table_memory(rows);
+                    total += start.elapsed();
+                    black_box(table);
+                }
+                total
+            })
+        });
+    }
+    group.finish();
+}
+
 // --- Break-even Analysis (fig_breakeven_*) ---
 
 fn bench_breakeven_history_query(c: &mut Criterion) {
@@ -616,7 +639,7 @@ criterion_group!(
 criterion_group!(
     name = memory;
     config = Criterion::default().sample_size(10);
-    targets = bench_memory_usage
+    targets = bench_memory_usage, bench_memory_usage_optimized
 );
 
 criterion_group!(
