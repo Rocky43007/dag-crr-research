@@ -16,6 +16,10 @@ Thumbs.db
 *.so
 *.dylib
 *.dll
+vendor/
+
+# LaTeX junk
+texput.log
 
 # Paper (VLDB/SIGMOD submission)
 paper/
